@@ -188,7 +188,11 @@ async function request(method: string, path: string, body?: object, auth = true)
     // verify-otp and other intentionally unauthenticated calls pass
     // `auth: false` and a 401 from those (e.g. a wrong password) is a normal
     // rejection, not a stale session, so it's left to the caller as before.
-    if (auth && res.status === 401 && !sessionExpiredHandled) {
+    // The getToken() check guards a race with a manual logout: if the user
+    // already logged out before this response came back, the token is
+    // already cleared and the app is already showing the login screen — a
+    // reload here would just force a jarring blank-screen flash on top of it.
+    if (auth && res.status === 401 && !sessionExpiredHandled && getToken()) {
       sessionExpiredHandled = true;
       clearUser();
       window.location.reload();
