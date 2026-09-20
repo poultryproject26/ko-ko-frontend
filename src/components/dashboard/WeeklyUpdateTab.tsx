@@ -100,7 +100,7 @@ const WeeklyUpdateTab = () => {
     setSaleLoading(true);
     try {
       await api.submitSaleStock({ broilers: saleBroiler, chicks: saleChicks, eggs: saleEggs });
-      toast.success("விற்பனை தகவல் சேமிக்கப்பட்டது ✅");
+      toast.success(t("saleInfoSavedToast") + " ✅");
       setSaleBroiler(0); setSaleChicks(0); setSaleEggs(0);
       setSaleResetKey((k) => k + 1);
     } catch (err: any) {
@@ -119,8 +119,8 @@ const WeeklyUpdateTab = () => {
         month3: vax3Month,
         month4Plus: vax4to7Month,
       });
-      toast.success("தடுப்பூசி இருப்பு சேமிக்கப்பட்டது ✅");
-      toast(`📅 தடுப்பூசி தேதி: ${addDays(3)} — அறிவிப்பு அனுப்பப்பட்டது`);
+      toast.success(t("vaxStockSavedToast") + " ✅");
+      toast(t("vaxDateNotifyToast").replace("{date}", addDays(3)));
       setVaxWithin1Month(0); setVax2Month(0); setVax3Month(0); setVax4to7Month(0);
       setVaxResetKey((k) => k + 1);
       queryClient.invalidateQueries({ queryKey: ["vaccinationStock"] });
@@ -166,7 +166,7 @@ const WeeklyUpdateTab = () => {
           <ShoppingCart size={20} className="text-white" />
           <div>
             <h3 className="text-sm font-bold text-white">{t("saleableReady")}</h3>
-            <p className="text-[11px] text-white/75">விற்பனைக்கு தயாரான கோழிகள்</p>
+            <p className="text-[11px] text-white/75">{t("saleableReadySub")}</p>
           </div>
         </div>
         <div className="p-4">
@@ -192,22 +192,22 @@ const WeeklyUpdateTab = () => {
         <div className="px-4 py-3 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #00695C, #009688)" }}>
           <Syringe size={20} className="text-white" />
           <div>
-            <h3 className="text-sm font-bold text-white">தடுப்பூசி இருப்பு</h3>
-            <p className="text-[11px] text-white/75">Vaccination stock by age group</p>
+            <h3 className="text-sm font-bold text-white">{t("vaccinationStockTitle")}</h3>
+            <p className="text-[11px] text-white/75">{t("vaccinationStockSubtitle")}</p>
           </div>
         </div>
         <div className="p-4">
           <div className="mb-3 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2">
             <p className="text-xs text-teal-800 font-semibold">
-              📅 இன்று பதிவு செய்தால் தடுப்பூசி தேதி: <span className="font-bold">{addDays(3)}</span>
+              📅 {t("vaxDateNotePrefix")} <span className="font-bold">{addDays(3)}</span>
             </p>
-            <p className="text-[11px] text-teal-700 mt-0.5">பதிவு செய்த உடனே அறிவிப்பு அனுப்பப்படும்.</p>
+            <p className="text-[11px] text-teal-700 mt-0.5">{t("vaxNoteSent")}</p>
           </div>
 
-          <Row label="1 மாதத்திற்குள் வயது" sub="💉 LaSota" value={vaxWithin1Month} onChange={setVaxWithin1Month} />
-          <Row label="2 மாத வயது" sub="💉 Fowl Pox" value={vax2Month} onChange={setVax2Month} />
-          <Row label="3 மாத வயது" sub="💉 Infectious Coryza" value={vax3Month} onChange={setVax3Month} />
-          <Row label="4 முதல் 7 மாதங்கள் மற்றும் மேல்" sub="💉 RDVK + Deworming (3 மாதத்திற்கு ஒருமுறை)" value={vax4to7Month} onChange={setVax4to7Month} />
+          <Row label={t("vaxWithinMonthAgeLabel")} sub={t("vaxSubLasota")} value={vaxWithin1Month} onChange={setVaxWithin1Month} />
+          <Row label={t("vax2MonthAgeLabel")} sub={t("vaxSubFowlPox")} value={vax2Month} onChange={setVax2Month} />
+          <Row label={t("vax3MonthAgeLabel")} sub={t("vaxSubInfectiousCoryza")} value={vax3Month} onChange={setVax3Month} />
+          <Row label={t("vax4to7MonthAgeLabel")} sub={t("vaxSubRdvkDeworming")} value={vax4to7Month} onChange={setVax4to7Month} />
 
           <div className="flex items-center justify-between pt-3 mt-1">
             <span className="text-sm text-muted-foreground">{t("total")}</span>
@@ -219,7 +219,7 @@ const WeeklyUpdateTab = () => {
             className="tap-target w-full text-base font-bold mt-4 rounded-xl shadow-sm disabled:opacity-40"
             style={{ background: vaxTotal > 0 ? "linear-gradient(135deg, #00695C, #009688)" : undefined }}
           >
-            {vaxLoading ? <Loader2 className="animate-spin" size={20} /> : "தடுப்பூசி இருப்பை சேமிக்கவும்"}
+            {vaxLoading ? <Loader2 className="animate-spin" size={20} /> : t("saveVaccinationStockButton")}
           </Button>
         </div>
       </div>

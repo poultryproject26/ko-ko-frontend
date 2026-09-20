@@ -81,7 +81,9 @@ const Index = () => {
         phone: data.phone,
         name: data.name,
         hamlet: data.hamlet,
+        hamletId: data.hamletId,
         street: data.street,
+        streetId: data.streetId,
         houseNo: data.houseNo,
         shg_name: data.shgName,
       });
@@ -120,15 +122,7 @@ const Index = () => {
   return (
     <div className="max-w-[430px] mx-auto min-h-screen shadow-lg" style={{ background: "linear-gradient(160deg, #f1f8e9 0%, #e8f5e9 50%, #f9fbe7 100%)" }}>
       {screen === "choose" && (
-        <>
-          <ChooseActionScreen onRegister={() => setScreen("register")} onLogin={handleLogin} />
-          <button
-            onClick={() => setScreen("admin-login")}
-            className="block mx-auto mb-6 text-xs font-medium text-muted-foreground underline underline-offset-2"
-          >
-            {t("adminLogin")}
-          </button>
-        </>
+        <ChooseActionScreen onRegister={() => setScreen("register")} onLogin={handleLogin} />
       )}
       {screen === "register" && (
         <RegistrationScreen onNext={handleRegisterData} onBack={() => setScreen("choose")} />

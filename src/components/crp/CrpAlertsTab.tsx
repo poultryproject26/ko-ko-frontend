@@ -4,11 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { HAMLETS } from "@/lib/auth";
 import { User } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2, MessageCircle, X } from "lucide-react";
+import { useHamlets, hamletDisplayName } from "@/hooks/use-hamlets";
+import type { Hamlet } from "@/lib/api";
 
 type TargetMode = "all" | "hamlet" | "shg";
 
@@ -87,11 +88,13 @@ const TargetSelector = ({
   hamlet, setHamlet,
   selectedShgs, setSelectedShgs,
   shgList,
+  hamlets, hamletsLoading, lang,
 }: {
   mode: TargetMode; setMode: (m: TargetMode) => void;
   hamlet: string; setHamlet: (h: string) => void;
   selectedShgs: string[]; setSelectedShgs: (s: string[]) => void;
   shgList: string[];
+  hamlets: Hamlet[]; hamletsLoading: boolean; lang: string;
 }) => (
   <div className="flex flex-col gap-2">
     <div className="flex rounded-lg overflow-hidden border border-border">
@@ -112,10 +115,17 @@ const TargetSelector = ({
       <select
         value={hamlet}
         onChange={(e) => setHamlet(e.target.value)}
-        className="border border-input rounded-md px-3 py-2.5 text-sm bg-card text-foreground"
+        disabled={hamletsLoading}
+        className="border border-input rounded-md px-3 py-2.5 text-sm bg-card text-foreground disabled:opacity-60"
       >
-        <option value="">ஊரை தேர்ந்தெடுக்கவும்</option>
-        {HAMLETS.map((h) => <option key={h} value={h}>{h}</option>)}
+        <option value="">{hamletsLoading ? "ஏற்றுகிறது..." : "ஊரை தேர்ந்தெடுக்கவும்"}</option>
+        {!hamletsLoading && hamlets.length === 0 && (
+          <option value="" disabled>ஊர்கள் இல்லை</option>
+        )}
+        {hamlets.map((h) => {
+          const label = hamletDisplayName(h, lang);
+          return <option key={h._id} value={label}>{label}</option>;
+        })}
       </select>
     )}
 
@@ -130,8 +140,9 @@ const TargetSelector = ({
 );
 
 const CrpAlertsTab = ({ user }: { user: User }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [shgList, setShgList] = useState<string[]>([]);
+  const { hamlets, hamletsLoading } = useHamlets();
 
   useEffect(() => {
     api.getShgGroups().then((data: any[]) => setShgList(data.map((g) => g.name))).catch(() => {});
@@ -219,6 +230,7 @@ const CrpAlertsTab = ({ user }: { user: User }) => {
             hamlet={alertHamlet} setHamlet={setAlertHamlet}
             selectedShgs={alertShgs} setSelectedShgs={setAlertShgs}
             shgList={shgList}
+            hamlets={hamlets} hamletsLoading={hamletsLoading} lang={lang}
           />
           <Textarea value={alertMsg} onChange={(e) => setAlertMsg(e.target.value)} placeholder={t("message")} rows={3} className="text-base" />
           <Button onClick={handleSendAlert} disabled={!alertMsg.trim() || alertLoading} className="tap-target w-full bg-danger text-danger-foreground">
@@ -239,6 +251,7 @@ const CrpAlertsTab = ({ user }: { user: User }) => {
             hamlet={tipHamlet} setHamlet={setTipHamlet}
             selectedShgs={tipShgs} setSelectedShgs={setTipShgs}
             shgList={shgList}
+            hamlets={hamlets} hamletsLoading={hamletsLoading} lang={lang}
           />
           <Textarea value={tipMsg} onChange={(e) => setTipMsg(e.target.value)} placeholder={t("message")} rows={3} className="text-base" />
           <Button onClick={handleSendTip} disabled={!tipMsg.trim() || tipLoading} className="tap-target w-full bg-primary text-primary-foreground">
@@ -259,6 +272,7 @@ const CrpAlertsTab = ({ user }: { user: User }) => {
             hamlet={priceHamlet} setHamlet={setPriceHamlet}
             selectedShgs={priceShgs} setSelectedShgs={setPriceShgs}
             shgList={shgList}
+            hamlets={hamlets} hamletsLoading={hamletsLoading} lang={lang}
           />
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">கறிக்கோழி (Broiler) ₹/kg</label>

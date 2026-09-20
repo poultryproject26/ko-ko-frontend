@@ -4,6 +4,9 @@ import { User } from "@/lib/auth";
 import { Hamlet } from "@/lib/api";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AdminOverview from "./AdminOverview";
+import AdminReports from "./AdminReports";
+import AdminAnnouncements from "./AdminAnnouncements";
 import HamletManagement from "./HamletManagement";
 import StreetManagement from "./StreetManagement";
 import CrpManagement from "./CrpManagement";
@@ -14,11 +17,11 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminSection = "hamlets" | "streets" | "crps" | "farmers";
+type AdminSection = "overview" | "reports" | "announcements" | "hamlets" | "streets" | "crps" | "farmers";
 
 const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
   const { t, lang, setLang } = useLanguage();
-  const [section, setSection] = useState<AdminSection>("hamlets");
+  const [section, setSection] = useState<AdminSection>("overview");
   const [streetsHamletId, setStreetsHamletId] = useState<string | null>(null);
 
   const handleViewStreets = (hamlet: Hamlet) => {
@@ -27,6 +30,9 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
   };
 
   const sections: { key: AdminSection; label: string }[] = [
+    { key: "overview", label: t("adminOverview") },
+    { key: "reports", label: t("adminReports") },
+    { key: "announcements", label: t("adminAnnouncements") },
     { key: "hamlets", label: t("adminHamletManagement") },
     { key: "streets", label: t("adminStreetManagement") },
     { key: "crps", label: t("adminCrpManagement") },
@@ -80,6 +86,9 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       </nav>
 
       <main className="max-w-6xl mx-auto p-4 sm:p-6">
+        {section === "overview" && <AdminOverview />}
+        {section === "reports" && <AdminReports />}
+        {section === "announcements" && <AdminAnnouncements />}
         {section === "hamlets" && <HamletManagement onViewStreets={handleViewStreets} />}
         {section === "streets" && <StreetManagement initialHamletId={streetsHamletId} />}
         {section === "crps" && <CrpManagement />}

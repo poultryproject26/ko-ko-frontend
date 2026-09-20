@@ -329,6 +329,27 @@ const BatchCard = ({ batch, onRefetch }: BatchCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [actionEvent, setActionEvent] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [mortalityInput, setMortalityInput] = useState("");
+  const [recordingMortality, setRecordingMortality] = useState(false);
+
+  const handleRecordMortality = async () => {
+    const count = parseInt(mortalityInput, 10);
+    if (!Number.isInteger(count) || count <= 0) {
+      toast.error("Enter a whole number greater than 0");
+      return;
+    }
+    setRecordingMortality(true);
+    try {
+      await api.recordMortality(batch.batchId, count);
+      toast.success(`✅ Recorded ${count} death(s)`);
+      setMortalityInput("");
+      onRefetch();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to record mortality");
+    } finally {
+      setRecordingMortality(false);
+    }
+  };
 
   const schedule: any[] = batch.schedule ?? [];
   const overdue   = schedule.filter((e) => e.status === "overdue");
@@ -390,6 +411,32 @@ const BatchCard = ({ batch, onRefetch }: BatchCardProps) => {
 
         {expanded && (
           <div className="border-t border-border/40 px-4 py-3 flex flex-col gap-2">
+            {typeof batch.activeBirdCount === "number" && (
+              <div className="flex items-center justify-between gap-2 bg-card border border-border/40 rounded-lg px-3 py-2 mb-1">
+                <div className="text-xs text-muted-foreground">
+                  Active: <span className="font-bold text-foreground">{batch.activeBirdCount}</span>
+                  {"  •  "}Deaths recorded: <span className="font-bold text-foreground">{batch.mortalityCount ?? 0}</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Input
+                    value={mortalityInput}
+                    onChange={(e) => setMortalityInput(e.target.value.replace(/\D/g, ""))}
+                    placeholder="+deaths"
+                    inputMode="numeric"
+                    className="h-7 w-20 text-xs px-2"
+                    disabled={recordingMortality || batch.activeBirdCount === 0}
+                  />
+                  <button
+                    onClick={handleRecordMortality}
+                    disabled={recordingMortality || !mortalityInput || batch.activeBirdCount === 0}
+                    className="text-xs font-semibold text-danger border border-danger/20 rounded-lg px-2 py-1 hover:bg-danger/10 disabled:opacity-40"
+                  >
+                    {recordingMortality ? "..." : "Record"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {[...overdue, ...upcoming].length === 0 && done.length > 0 && (
               <p className="text-xs text-success font-semibold flex items-center gap-1">
                 <CheckCircle2 size={12} /> All vaccinations completed

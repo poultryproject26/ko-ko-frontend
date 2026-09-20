@@ -4,13 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
-import { HAMLETS } from "@/lib/auth";
 import { formatDate } from "@/lib/mockData";
+import { useHamlets, hamletDisplayName } from "@/hooks/use-hamlets";
 import { MessageCircle, ShoppingBag, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 const CrpStockTab = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { hamlets, hamletsLoading } = useHamlets();
   const [stocks, setStocks] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(0);
   const [tab, setTab] = useState<"available" | "sold">("available");
@@ -95,10 +96,14 @@ const CrpStockTab = () => {
       <select
         value={hamletFilter}
         onChange={(e) => setHamletFilter(e.target.value)}
-        className="border border-input rounded-md px-3 py-2 text-sm bg-card text-foreground"
+        disabled={hamletsLoading}
+        className="border border-input rounded-md px-3 py-2 text-sm bg-card text-foreground disabled:opacity-60"
       >
-        <option value="">{t("allHamlets")}</option>
-        {HAMLETS.map((h) => <option key={h} value={h}>{h}</option>)}
+        <option value="">{hamletsLoading ? t("loading") : t("allHamlets")}</option>
+        {hamlets.map((h) => {
+          const label = hamletDisplayName(h, lang);
+          return <option key={h._id} value={label}>{label}</option>;
+        })}
       </select>
 
       {/* Tabs */}

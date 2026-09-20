@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/lib/mockData";
 import { TextToSpeech } from "@capacitor-community/text-to-speech";
-import { Bell, AlertTriangle, TrendingUp, Lightbulb, Volume2, VolumeX, Square, Syringe, CheckCircle2 } from "lucide-react";
+import { Bell, AlertTriangle, TrendingUp, Lightbulb, Volume2, VolumeX, Square, Syringe, CheckCircle2, Megaphone } from "lucide-react";
 import { User } from "@/lib/auth";
 
 const useSpeech = () => {
@@ -131,6 +131,7 @@ const NotificationsTab = ({ user }: { user: User }) => {
     loan_rejected:           { label: "Loan Rejected",           className: "bg-danger text-danger-foreground", icon: AlertTriangle, iconColor: "text-danger", bg: "bg-danger/8" },
     loan_due_reminder:       { label: "Loan Due Reminder",       className: "bg-warning text-warning-foreground", icon: Bell, iconColor: "text-warning", bg: "bg-warning/8" },
     loan_disbursed:          { label: "Loan Disbursed",          className: "bg-success text-success-foreground", icon: TrendingUp, iconColor: "text-success", bg: "bg-success/8" },
+    admin_announcement:      { label: t("announcementLabel"),    className: "bg-primary text-primary-foreground", icon: Megaphone, iconColor: "text-primary", bg: "bg-primary/8" },
   };
 
   if (isLoading) {

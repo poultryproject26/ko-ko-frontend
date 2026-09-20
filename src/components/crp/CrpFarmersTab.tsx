@@ -5,15 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { HAMLETS } from "@/lib/auth";
 import { formatDate } from "@/lib/mockData";
+import { useHamlets, hamletDisplayName } from "@/hooks/use-hamlets";
 import { ArrowLeft, Search, Plus, Trash2, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const CrpFarmersTab = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { hamlets, hamletsLoading } = useHamlets();
   const queryClient = useQueryClient();
   const [subTab, setSubTab] = useState<"farmers" | "shg">("farmers");
   const [search, setSearch] = useState("");
@@ -287,9 +288,17 @@ const CrpFarmersTab = () => {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} placeholder={t("searchFarmers")} className="pl-9" />
         </div>
-        <select value={hamletFilter} onChange={(e) => { setHamletFilter(e.target.value); setPage(0); }} className="border border-input rounded-md px-3 py-2 text-sm bg-card text-foreground">
-          <option value="">{t("allHamlets")}</option>
-          {HAMLETS.map((h) => <option key={h} value={h}>{h}</option>)}
+        <select
+          value={hamletFilter}
+          onChange={(e) => { setHamletFilter(e.target.value); setPage(0); }}
+          disabled={hamletsLoading}
+          className="border border-input rounded-md px-3 py-2 text-sm bg-card text-foreground disabled:opacity-60"
+        >
+          <option value="">{hamletsLoading ? t("loading") : t("allHamlets")}</option>
+          {hamlets.map((h) => {
+            const label = hamletDisplayName(h, lang);
+            return <option key={h._id} value={label}>{label}</option>;
+          })}
         </select>
       </div>
 

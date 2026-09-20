@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HAMLETS } from "@/lib/auth";
+import { useHamlets, hamletDisplayName } from "@/hooks/use-hamlets";
 import {
   FileBarChart2,
   MessageSquare,
@@ -72,7 +72,8 @@ const isActivityType = (value: string): value is ActivityItem["type"] =>
   value === "bird" || value === "service" || value === "disease";
 
 const CrpDashboardTab = ({ onNavigate }: CrpDashboardTabProps) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { hamlets, hamletsLoading } = useHamlets();
   const [showWeeklyDetail, setShowWeeklyDetail] = useState(false);
   const [weeklyView, setWeeklyView] = useState<"updated" | "not_updated">("not_updated");
   const [activityTab, setActivityTab] = useState<"unread" | "read">("unread");
@@ -133,10 +134,11 @@ const CrpDashboardTab = ({ onNavigate }: CrpDashboardTabProps) => {
   const totalUpdated = updatedUserIds.size;
   const totalNotUpdated = Math.max(0, totalFarmers - totalUpdated);
 
-  const hamletUpdateStats = HAMLETS.map((hamlet) => {
-    const hf = farmers.filter((f) => f.hamlet === hamlet);
+  const hamletUpdateStats = hamletsLoading ? [] : hamlets.map((h) => {
+    const hamletName = hamletDisplayName(h, lang);
+    const hf = farmers.filter((f) => f.hamlet === hamletName);
     const updated = hf.filter((f) => updatedUserIds.has(f._id)).length;
-    return { hamlet, updated, total: hf.length, notUpdated: hf.length - updated };
+    return { hamlet: hamletName, updated, total: hf.length, notUpdated: hf.length - updated };
   }).filter((h) => h.total > 0);
 
   const StatRow = ({ label, value }: { label: string; value: number | string }) => (
