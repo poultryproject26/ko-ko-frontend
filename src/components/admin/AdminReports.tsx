@@ -55,11 +55,11 @@ function ExportButtons({ onExcel, onPdf }: { onExcel: () => void; onPdf: () => P
   const [loading, setLoading] = useState(false);
   const handlePdf = async () => { setLoading(true); await onPdf(); setLoading(false); };
   return (
-    <div className="flex gap-2 mt-2">
-      <Button size="sm" onClick={onExcel} className="gap-1 bg-success text-success-foreground flex-1">
+    <div className="flex gap-2 mt-1 sm:justify-end">
+      <Button size="sm" onClick={onExcel} className="gap-1 bg-success text-success-foreground hover:bg-success/90 flex-1 sm:flex-none sm:min-w-[110px]">
         <Download size={13} /> Excel
       </Button>
-      <Button size="sm" onClick={handlePdf} disabled={loading} variant="outline" className="gap-1 flex-1">
+      <Button size="sm" onClick={handlePdf} disabled={loading} variant="outline" className="gap-1 flex-1 sm:flex-none sm:min-w-[110px]">
         <FileText size={13} /> {loading ? t("generatingPdf") : "PDF"}
       </Button>
     </div>
@@ -74,14 +74,14 @@ function ReportTable({ subtitle, headers, rows, totalsRow, filename, pdfTitle }:
 }) {
   const { t } = useLanguage();
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground py-4 text-center">{t("noReportDataFound")}</p>;
+    return <p className="text-sm text-muted-foreground py-6 text-center rounded-lg border border-dashed border-border bg-muted/20">{t("noReportDataFound")}</p>;
   }
   return (
     <div className="flex flex-col gap-2">
       {subtitle && <p className="text-sm font-semibold text-foreground">{subtitle}</p>}
-      <div className="overflow-x-auto rounded-md border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             <TableRow>
               {headers.map((h) => <TableHead key={h}>{h}</TableHead>)}
             </TableRow>
@@ -98,7 +98,7 @@ function ReportTable({ subtitle, headers, rows, totalsRow, filename, pdfTitle }:
             ))}
           </TableBody>
           <TableFooter>
-            <TableRow>
+            <TableRow className="bg-primary/5 hover:bg-primary/10">
               {totalsRow.map((cell, j) => (
                 <TableCell key={j} className="font-bold text-foreground">{cell}</TableCell>
               ))}
@@ -119,13 +119,22 @@ function CollapsibleSection({ title, defaultOpen = true, note, children }: {
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Card className="p-4">
-      <button className="w-full flex items-center justify-between" onClick={() => setOpen(!open)}>
-        <h3 className="text-base font-bold text-foreground">{title}</h3>
-        {open ? <ChevronUp size={18} className="text-muted-foreground" /> : <ChevronDown size={18} className="text-muted-foreground" />}
+    <Card className="p-0 overflow-hidden border-border/60">
+      <button
+        className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 text-left hover:bg-muted/40 transition-colors"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="w-1 h-6 rounded-full bg-primary shrink-0" />
+          <h3 className="text-base font-bold text-foreground">{title}</h3>
+        </div>
+        <span className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
+          {open ? <ChevronUp size={18} className="text-muted-foreground" /> : <ChevronDown size={18} className="text-muted-foreground" />}
+        </span>
       </button>
       {open && (
-        <div className="mt-3 flex flex-col gap-4">
+        <div className="border-t border-border/60 px-4 sm:px-5 py-4 flex flex-col gap-4">
           {note}
           {children}
         </div>
@@ -136,7 +145,7 @@ function CollapsibleSection({ title, defaultOpen = true, note, children }: {
 
 function EstimateNote({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/5 p-3">
+    <div className="flex items-start gap-2 rounded-lg border border-warning/30 border-l-4 border-l-warning bg-warning/5 p-3">
       <Info size={16} className="text-warning shrink-0 mt-0.5" />
       <p className="text-xs text-foreground">{text}</p>
     </div>
@@ -336,7 +345,7 @@ const AdminReports = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-foreground">{t("adminReports")}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("adminReports")}</h2>
         <Button variant="outline" size="sm" onClick={loadAll} disabled={loading}>
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           {t("refresh")}
@@ -344,13 +353,13 @@ const AdminReports = () => {
       </div>
 
       {loading ? (
-        <Card className="p-0 overflow-hidden">
+        <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
           <div className="flex items-center justify-center py-16">
             <Loader2 className="animate-spin text-muted-foreground" size={24} />
           </div>
         </Card>
       ) : error ? (
-        <Card className="p-0 overflow-hidden">
+        <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
           <div className="flex flex-col items-center gap-2 py-16">
             <p className="text-sm text-destructive">{error}</p>
             <Button variant="outline" size="sm" onClick={loadAll}>{t("refresh")}</Button>
@@ -435,9 +444,9 @@ const AdminReports = () => {
                 { label: t("loanTotalRejectedLabel"), value: loanRejectedTotal },
                 { label: t("loanTotalPendingLabel"), value: loanPendingTotal },
               ].map((tile) => (
-                <div key={tile.label} className="rounded-md border border-border p-3 bg-muted/20">
+                <div key={tile.label} className="rounded-lg border border-border/60 p-3 bg-muted/20">
                   <p className="text-xs text-muted-foreground">{tile.label}</p>
-                  <p className="text-lg font-bold text-foreground">₹{tile.value.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-foreground tabular-nums">₹{tile.value.toLocaleString()}</p>
                 </div>
               ))}
             </div>

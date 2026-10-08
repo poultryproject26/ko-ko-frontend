@@ -63,10 +63,10 @@ const AdminAnnouncements = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-foreground">{t("adminAnnouncements")}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("adminAnnouncements")}</h2>
       </div>
 
-      <Card className="p-4 flex flex-col gap-4">
+      <Card className="p-4 sm:p-6 flex flex-col gap-5 border-border/60">
         <div>
           <Label className="mb-2 block">{t("announcementAudienceLabel")}</Label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

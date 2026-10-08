@@ -209,7 +209,7 @@ const CrpManagement = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-foreground">{t("adminCrpManagement")}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("adminCrpManagement")}</h2>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
@@ -222,7 +222,7 @@ const CrpManagement = () => {
         </div>
       </div>
 
-      <Card className="p-0 overflow-hidden">
+      <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="animate-spin text-muted-foreground" size={24} />
@@ -236,7 +236,7 @@ const CrpManagement = () => {
           <p className="text-center text-sm text-muted-foreground py-16">{t("noCrpsFound")}</p>
         ) : (
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead>{t("crpNameLabel")}</TableHead>
                 <TableHead>{t("phone")}</TableHead>

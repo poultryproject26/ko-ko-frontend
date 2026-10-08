@@ -192,7 +192,7 @@ const FarmerManagement = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-foreground">{t("adminFarmerManagement")}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("adminFarmerManagement")}</h2>
         <div className="flex items-center gap-2">
           <Button variant={viewMode === "all" ? "default" : "outline"} size="sm" onClick={() => setViewMode("all")}>
             {t("allFarmersTab")}
@@ -206,7 +206,7 @@ const FarmerManagement = () => {
 
       {viewMode === "all" ? (
         <>
-          <Card className="p-3 flex items-center gap-3 flex-wrap">
+          <Card className="p-3 sm:p-4 flex items-center gap-3 flex-wrap border-border/60 shadow-sm">
             <Select value={approvalFilter} onValueChange={(v) => setApprovalFilter(v as ApprovalFilter)}>
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -230,7 +230,7 @@ const FarmerManagement = () => {
             </Button>
           </Card>
 
-          <Card className="p-0 overflow-hidden">
+          <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="animate-spin text-muted-foreground" size={24} />
@@ -245,7 +245,7 @@ const FarmerManagement = () => {
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead>{t("farmerName")}</TableHead>
                       <TableHead>{t("phone")}</TableHead>
@@ -316,7 +316,7 @@ const FarmerManagement = () => {
               {t("refresh")}
             </Button>
           </div>
-          <Card className="p-0 overflow-hidden">
+          <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
             {unresolvedLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="animate-spin text-muted-foreground" size={24} />
@@ -331,7 +331,7 @@ const FarmerManagement = () => {
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead>{t("farmerName")}</TableHead>
                       <TableHead>{t("phone")}</TableHead>

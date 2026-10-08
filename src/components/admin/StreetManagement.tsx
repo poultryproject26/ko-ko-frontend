@@ -156,7 +156,7 @@ const StreetManagement = ({ initialHamletId }: StreetManagementProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold text-foreground">{t("adminStreetManagement")}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("adminStreetManagement")}</h2>
       </div>
 
       <Card className="p-4">
@@ -193,7 +193,7 @@ const StreetManagement = ({ initialHamletId }: StreetManagementProps) => {
             </div>
           </div>
 
-          <Card className="p-0 overflow-hidden">
+          <Card className="p-0 overflow-hidden border-border/60 shadow-sm">
             {streetsLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="animate-spin text-muted-foreground" size={24} />
@@ -207,7 +207,7 @@ const StreetManagement = ({ initialHamletId }: StreetManagementProps) => {
               <p className="text-center text-sm text-muted-foreground py-16">{t("noStreetsFound")}</p>
             ) : (
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/50">
                   <TableRow>
                     <TableHead>{t("nameTaLabel")}</TableHead>
                     <TableHead>{t("nameEnLabel")}</TableHead>
