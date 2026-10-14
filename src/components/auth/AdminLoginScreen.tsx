@@ -3,10 +3,11 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { User } from "@/lib/auth";
+import { isValidFourDigitPassword, normalizePhone } from "@/lib/authValidation";
 
 interface AdminLoginScreenProps {
   onLoginSuccess: (user: User, token: string) => void;
@@ -17,9 +18,10 @@ const AdminLoginScreen = ({ onLoginSuccess, onBack }: AdminLoginScreenProps) => 
   const { t, lang, setLang } = useLanguage();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = phone.length === 10 && password.length > 0 && !loading;
+  const canSubmit = phone.length === 10 && isValidFourDigitPassword(password) && !loading;
 
   const handleLogin = async () => {
     if (!canSubmit) return;
@@ -65,7 +67,7 @@ const AdminLoginScreen = ({ onLoginSuccess, onBack }: AdminLoginScreenProps) => 
             <Label className="text-sm font-semibold text-foreground mb-2 block">{t("phoneNumber")}</Label>
             <Input
               value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              onChange={(e) => setPhone(normalizePhone(e.target.value))}
               className="tap-target text-lg font-semibold tracking-widest border-2 focus:border-primary rounded-xl"
               placeholder="98765 43210"
               inputMode="numeric"
@@ -75,14 +77,25 @@ const AdminLoginScreen = ({ onLoginSuccess, onBack }: AdminLoginScreenProps) => 
 
           <div>
             <Label className="text-sm font-semibold text-foreground mb-2 block">{t("password")}</Label>
-            <Input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="tap-target text-base border-2 focus:border-primary rounded-xl"
-              placeholder={t("passwordPlaceholder")}
-              type="password"
-              onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
-            />
+            <div className="relative">
+              <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                className="tap-target text-base border-2 focus:border-primary rounded-xl pr-10"
+                placeholder={t("passwordPlaceholder")}
+                type={showPassword ? "text" : "password"}
+                inputMode="numeric"
+                onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <Button

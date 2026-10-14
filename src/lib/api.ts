@@ -202,15 +202,17 @@ async function request(method: string, path: string, body?: object, auth = true)
     // so every caller's existing `err?.message` reliably gets the real backend
     // text either way, while keeping every other field (e.g. a 409's
     // streetCount/farmerCount) intact on the thrown object.
-    throw { ...data, message: data?.message || data?.error || "Request failed" };
+    throw { ...data, status: res.status, message: data?.message || data?.error || "Request failed" };
   }
   return data;
 }
 
 export const api = {
   // Auth
-  sendOtp: (phone: string) => request("POST", "/auth/send-otp", { phone }, false),
+  sendOtp: (phone: string): Promise<{ success: boolean }> => request("POST", "/auth/send-otp", { phone }, false),
   verifyOtp: (phone: string, otp: string) => request("POST", "/auth/verify-otp", { phone, otp }, false),
+  setupPassword: (phone: string, otp: string, password: string): Promise<{ success: boolean }> =>
+    request("POST", "/auth/setup-password", { phone, otp, password }, false),
   register: (data: { phone: string; name: string; hamlet?: string; hamletId?: string; street?: string; streetId?: string; houseNo: string; shg_name: string }) =>
     request("POST", "/auth/register", data, false),
   login: (phone: string, password: string) => request("POST", "/auth/login", { phone, password }, false),

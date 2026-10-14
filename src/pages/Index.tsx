@@ -5,6 +5,8 @@ import ChooseActionScreen from "@/components/auth/ChooseActionScreen";
 import RegistrationScreen from "@/components/auth/RegistrationScreen";
 import OtpScreen from "@/components/auth/OtpScreen";
 import AdminLoginScreen from "@/components/auth/AdminLoginScreen";
+import PasswordLoginScreen from "@/components/auth/PasswordLoginScreen";
+import PasswordSetupScreen from "@/components/auth/PasswordSetupScreen";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import Dashboard from "@/components/dashboard/Dashboard";
 import CrpDashboard from "@/components/crp/CrpDashboard";
@@ -14,14 +16,13 @@ import { setupPushNotifications, teardownPushNotifications } from "@/lib/pushNot
 
 const INACTIVITY_MS = 30 * 60 * 1000; // 30 minutes
 
-type Screen = "choose" | "register" | "otp" | "admin-login" | "app";
+type Screen = "choose" | "register" | "otp" | "login" | "password-setup" | "admin-login" | "app";
 
 const Index = () => {
   const { t } = useLanguage();
   const [user, setUserState] = useState<User | null>(null);
   const [screen, setScreen] = useState<Screen>("choose");
   const [pendingPhone, setPendingPhone] = useState("");
-  const [pendingOtp, setPendingOtp] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -64,14 +65,17 @@ const Index = () => {
   }, [user]);
 
   const handleLogin = async (phone: string) => {
+    setPendingPhone(phone);
+    setScreen("login");
+  };
+
+  const handlePasswordSetup = async (phone: string) => {
     try {
-      const res = await api.sendOtp(phone);
+      await api.sendOtp(phone);
       setPendingPhone(phone);
-      setPendingOtp(res.otp || null);
-      setIsRegistering(false);
-      setScreen("otp");
+      setScreen("password-setup");
     } catch (err: any) {
-      toast.error(err?.message || t("phoneNotRegistered"));
+      toast.error(err?.status === 503 ? t("otpDeliveryUnavailable") : t("otpRequestFailed"));
     }
   };
 
@@ -87,13 +91,12 @@ const Index = () => {
         houseNo: data.houseNo,
         shg_name: data.shgName,
       });
-      const res = await api.sendOtp(data.phone);
+      await api.sendOtp(data.phone);
       setPendingPhone(data.phone);
-      setPendingOtp(res.otp || null);
       setIsRegistering(true);
       setScreen("otp");
     } catch (err: any) {
-      toast.error(err?.message || t("registrationFailed"));
+      toast.error(err?.status === 503 ? t("otpDeliveryUnavailable") : t("registrationFailed"));
     }
   };
 
@@ -130,9 +133,24 @@ const Index = () => {
       {screen === "otp" && (
         <OtpScreen
           phone={pendingPhone}
-          devOtp={pendingOtp}
           onVerified={handleOtpVerified}
           onBack={() => setScreen("choose")}
+        />
+      )}
+      {screen === "login" && (
+        <PasswordLoginScreen
+          phone={pendingPhone}
+          onBack={() => setScreen("choose")}
+          onSetupPassword={() => handlePasswordSetup(pendingPhone)}
+          onLoginSuccess={handleOtpVerified}
+        />
+      )}
+      {screen === "password-setup" && (
+        <PasswordSetupScreen
+          phone={pendingPhone}
+          onBack={() => setScreen("login")}
+          onResend={() => api.sendOtp(pendingPhone)}
+          onSetupSuccess={handleOtpVerified}
         />
       )}
       {screen === "admin-login" && (
