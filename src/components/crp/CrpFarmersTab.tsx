@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/mockData";
 import { useHamlets, hamletDisplayName } from "@/hooks/use-hamlets";
-import { ArrowLeft, Search, Plus, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Search, Plus, Trash2, Users, KeyRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import StaffPasswordDialog from "@/components/auth/StaffPasswordDialog";
 
 const CrpFarmersTab = () => {
   const { t, lang } = useLanguage();
@@ -26,6 +27,7 @@ const CrpFarmersTab = () => {
   const [newShgName, setNewShgName] = useState("");
   const [shgToDelete, setShgToDelete] = useState<any | null>(null);
   const [farmerToDelete, setFarmerToDelete] = useState(false);
+  const [enrollingFarmer, setEnrollingFarmer] = useState<any | null>(null);
   const perPage = 10;
 
   const { data: farmers = [], refetch: refetchFarmers } = useQuery({
@@ -67,6 +69,14 @@ const CrpFarmersTab = () => {
       toast.error(err?.message || "நீக்க முடியவில்லை");
       setFarmerToDelete(false);
     }
+  };
+
+  const handleSetFarmerPassword = async (password: string) => {
+    if (!enrollingFarmer) return;
+    await api.setFarmerPassword(enrollingFarmer._id, password);
+    toast.success(t("farmerPasswordSaved"));
+    setEnrollingFarmer(null);
+    await refetchFarmers();
   };
 
   const handleAddShg = async () => {
@@ -153,6 +163,9 @@ const CrpFarmersTab = () => {
             </div>
             <Button size="sm" variant="outline" onClick={() => setFarmerToDelete(true)} className="border-danger text-danger gap-1 shrink-0">
               <Trash2 size={14} /> நீக்கு
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setEnrollingFarmer(selectedFarmer)} className="gap-1 shrink-0">
+              <KeyRound size={14} /> {t("setPassword")}
             </Button>
           </div>
         </Card>
@@ -263,6 +276,12 @@ const CrpFarmersTab = () => {
             ))}</div>
           )}
         </Card>
+        <StaffPasswordDialog
+          open={Boolean(enrollingFarmer)}
+          targetName={enrollingFarmer?.name || ""}
+          onOpenChange={(open) => !open && setEnrollingFarmer(null)}
+          onSave={handleSetFarmerPassword}
+        />
       </div>
     );
   }
@@ -329,6 +348,12 @@ const CrpFarmersTab = () => {
             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>←</Button>
             <span className="text-sm text-muted-foreground">{page + 1} / {totalPages}</span>
             <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>→</Button>
+            <StaffPasswordDialog
+              open={Boolean(enrollingFarmer)}
+              targetName={enrollingFarmer?.name || ""}
+              onOpenChange={(open) => !open && setEnrollingFarmer(null)}
+              onSave={handleSetFarmerPassword}
+            />
           </div>
         )}
       </Card>

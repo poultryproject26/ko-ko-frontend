@@ -12,16 +12,14 @@ import { useLanguage } from "@/i18n/LanguageContext";
 interface PasswordLoginScreenProps {
   phone: string;
   onBack: () => void;
-  onSetupPassword: () => Promise<void>;
   onLoginSuccess: (user: User, token: string) => void;
 }
 
-const PasswordLoginScreen = ({ phone, onBack, onSetupPassword, onLoginSuccess }: PasswordLoginScreenProps) => {
+const PasswordLoginScreen = ({ phone, onBack, onLoginSuccess }: PasswordLoginScreenProps) => {
   const { t, lang, setLang } = useLanguage();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [setupLoading, setSetupLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!isValidFourDigitPassword(password)) {
@@ -37,15 +35,6 @@ const PasswordLoginScreen = ({ phone, onBack, onSetupPassword, onLoginSuccess }:
       toast.error(t("invalidCredentialsToast"));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSetup = async () => {
-    setSetupLoading(true);
-    try {
-      await onSetupPassword();
-    } finally {
-      setSetupLoading(false);
     }
   };
 
@@ -94,20 +83,12 @@ const PasswordLoginScreen = ({ phone, onBack, onSetupPassword, onLoginSuccess }:
 
           <Button
             onClick={handleLogin}
-            disabled={loading || setupLoading || !isValidFourDigitPassword(password)}
+            disabled={loading || !isValidFourDigitPassword(password)}
             className="tap-target w-full text-base font-bold rounded-xl shadow-sm disabled:opacity-40"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : t("login") + " →"}
           </Button>
 
-          <button
-            type="button"
-            onClick={handleSetup}
-            disabled={loading || setupLoading}
-            className="text-primary text-sm font-semibold underline underline-offset-2 disabled:opacity-50"
-          >
-            {setupLoading ? <Loader2 className="animate-spin inline" size={16} /> : t("firstTimeSetPassword")}
-          </button>
         </div>
       </div>
     </div>
