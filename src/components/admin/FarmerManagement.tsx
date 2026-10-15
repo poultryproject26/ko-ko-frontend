@@ -20,7 +20,8 @@ import {
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { Loader2, Check, X, Trash2, RefreshCw, MapPin, Search } from "lucide-react";
+import { Loader2, Check, X, Trash2, RefreshCw, MapPin, Search, KeyRound } from "lucide-react";
+import StaffPasswordDialog from "@/components/auth/StaffPasswordDialog";
 
 type ViewMode = "all" | "unresolved";
 type ApprovalFilter = "all" | "pending" | "approved";
@@ -46,6 +47,7 @@ const FarmerManagement = () => {
   const [unresolvedError, setUnresolvedError] = useState<string | null>(null);
 
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const [enrollingFarmer, setEnrollingFarmer] = useState<Farmer | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Farmer | null>(null);
   const [rejectLoading, setRejectLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Farmer | null>(null);
@@ -101,6 +103,14 @@ const FarmerManagement = () => {
     } finally {
       setActioningId(null);
     }
+  };
+
+  const handleSetFarmerPassword = async (password: string) => {
+    if (!enrollingFarmer) return;
+    await api.setFarmerPassword(enrollingFarmer._id, password);
+    toast.success(t("farmerPasswordSaved"));
+    setEnrollingFarmer(null);
+    await refreshAfterMutation();
   };
 
   const handleReject = async () => {
@@ -284,6 +294,13 @@ const FarmerManagement = () => {
                                 {actioningId === farmer._id ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
                               </Button>
                             )}
+                            <Button
+                              variant="outline" size="icon" className="h-8 w-8"
+                              title={t("staffPasswordTitle")}
+                              onClick={() => setEnrollingFarmer(farmer)}
+                            >
+                              <KeyRound size={14} />
+                            </Button>
                             {!farmer.approved && (
                               <Button
                                 variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
@@ -464,6 +481,13 @@ const FarmerManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <StaffPasswordDialog
+        open={Boolean(enrollingFarmer)}
+        targetName={enrollingFarmer?.name || ""}
+        onOpenChange={(open) => !open && setEnrollingFarmer(null)}
+        onSave={handleSetFarmerPassword}
+      />
     </div>
   );
 };

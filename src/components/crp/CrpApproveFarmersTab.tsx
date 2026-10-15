@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { KeyRound } from "lucide-react";
+import StaffPasswordDialog from "@/components/auth/StaffPasswordDialog";
 
 const CrpApproveFarmersTab = () => {
   const { t } = useLanguage();
   const [farmers, setFarmers] = useState<any[]>([]);
+  const [enrollingFarmer, setEnrollingFarmer] = useState<any | null>(null);
 
   useEffect(() => {
     api.getPendingFarmers().then((data) => {
@@ -26,6 +29,14 @@ const CrpApproveFarmersTab = () => {
     else await api.rejectFarmer(id);
     setFarmers((prev) => prev.filter((f) => f._id !== id));
     toast.success(action === "approved" ? "✅ விவசாயி அனுமதிக்கப்பட்டார்" : "❌ விவசாயி நிராகரிக்கப்பட்டார்");
+  };
+
+  const handleSetPassword = async (password: string) => {
+    if (!enrollingFarmer) return;
+    await api.setFarmerPassword(enrollingFarmer._id, password);
+    setFarmers((prev) => prev.filter((f) => f._id !== enrollingFarmer._id));
+    setEnrollingFarmer(null);
+    toast.success(t("farmerPasswordSaved"));
   };
 
   return (
@@ -53,12 +64,21 @@ const CrpApproveFarmersTab = () => {
             <Button size="sm" onClick={() => handle(f._id, "approved")} className="bg-success text-success-foreground gap-1">
               <Check size={14} /> அனுமதி
             </Button>
+            <Button size="sm" variant="outline" onClick={() => setEnrollingFarmer(f)} title={t("staffPasswordTitle")}>
+              <KeyRound size={14} /> {t("setPassword")}
+            </Button>
             <Button size="sm" onClick={() => handle(f._id, "rejected")} variant="outline" className="border-danger text-danger gap-1">
               <X size={14} /> நிராகரி
             </Button>
           </div>
         </Card>
       ))}
+      <StaffPasswordDialog
+        open={Boolean(enrollingFarmer)}
+        targetName={enrollingFarmer?.name || ""}
+        onOpenChange={(open) => !open && setEnrollingFarmer(null)}
+        onSave={handleSetPassword}
+      />
     </div>
   );
 };

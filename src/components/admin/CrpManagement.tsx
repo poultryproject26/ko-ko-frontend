@@ -21,7 +21,9 @@ import {
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { Loader2, Plus, Pencil, Trash2, RefreshCw, MapPin } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, RefreshCw, MapPin, KeyRound } from "lucide-react";
+import StaffPasswordDialog from "@/components/auth/StaffPasswordDialog";
+import { isValidFourDigitPassword } from "@/lib/authValidation";
 
 const DESIGNATIONS = ["CRP", "PLF Representative", "Animal Husbandry Officer"];
 
@@ -44,6 +46,7 @@ const CrpManagement = () => {
   const [createForm, setCreateForm] = useState(emptyCreateForm);
   const [createHamletIds, setCreateHamletIds] = useState<string[]>([]);
   const [createLoading, setCreateLoading] = useState(false);
+  const [passwordTarget, setPasswordTarget] = useState<Crp | null>(null);
 
   const [editing, setEditing] = useState<Crp | null>(null);
   const [editForm, setEditForm] = useState({ name: "", phone: "", designation: DESIGNATIONS[0], assignedLocation: "" });
@@ -79,6 +82,10 @@ const CrpManagement = () => {
       toast.error(t("crpNamePhoneRequiredToast"));
       return;
     }
+    if (password && !isValidFourDigitPassword(password)) {
+      toast.error(t("passwordFormatError"));
+      return;
+    }
     setCreateLoading(true);
     try {
       await api.createCrp({
@@ -99,6 +106,13 @@ const CrpManagement = () => {
     } finally {
       setCreateLoading(false);
     }
+  };
+
+  const handleSetCrpPassword = async (password: string) => {
+    if (!passwordTarget) return;
+    await api.setCrpPassword(passwordTarget._id, password);
+    toast.success(t("crpPasswordSaved"));
+    setPasswordTarget(null);
   };
 
   const openEdit = (crp: Crp) => {
@@ -273,6 +287,13 @@ const CrpManagement = () => {
                       <Button variant="outline" size="icon" className="h-8 w-8" title={t("assignHamletsTitle")} onClick={() => openAssign(crp)}>
                         <MapPin size={14} />
                       </Button>
+                      <Button
+                        variant="outline" size="icon" className="h-8 w-8"
+                        title={t("staffPasswordTitle")}
+                        onClick={() => setPasswordTarget(crp)}
+                      >
+                        <KeyRound size={14} />
+                      </Button>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => openEdit(crp)}>
                         <Pencil size={14} />
                       </Button>
@@ -330,7 +351,8 @@ const CrpManagement = () => {
               <Input
                 type="password"
                 value={createForm.password}
-                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+                inputMode="numeric"
                 placeholder={t("crpPasswordDefaultHint")}
               />
             </div>
@@ -427,6 +449,12 @@ const CrpManagement = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <StaffPasswordDialog
+        open={Boolean(passwordTarget)}
+        targetName={passwordTarget?.name || ""}
+        onOpenChange={(open) => !open && setPasswordTarget(null)}
+        onSave={handleSetCrpPassword}
+      />
     </div>
   );
 };

@@ -3,8 +3,8 @@ import { getUser, setUser, getToken, clearUser, User } from "@/lib/auth";
 import { api } from "@/lib/api";
 import ChooseActionScreen from "@/components/auth/ChooseActionScreen";
 import RegistrationScreen from "@/components/auth/RegistrationScreen";
-import OtpScreen from "@/components/auth/OtpScreen";
 import AdminLoginScreen from "@/components/auth/AdminLoginScreen";
+import PasswordLoginScreen from "@/components/auth/PasswordLoginScreen";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import Dashboard from "@/components/dashboard/Dashboard";
 import CrpDashboard from "@/components/crp/CrpDashboard";
@@ -14,15 +14,13 @@ import { setupPushNotifications, teardownPushNotifications } from "@/lib/pushNot
 
 const INACTIVITY_MS = 30 * 60 * 1000; // 30 minutes
 
-type Screen = "choose" | "register" | "otp" | "admin-login" | "app";
+type Screen = "choose" | "register" | "login" | "admin-login" | "app";
 
 const Index = () => {
   const { t } = useLanguage();
   const [user, setUserState] = useState<User | null>(null);
   const [screen, setScreen] = useState<Screen>("choose");
   const [pendingPhone, setPendingPhone] = useState("");
-  const [pendingOtp, setPendingOtp] = useState<string | null>(null);
-  const [isRegistering, setIsRegistering] = useState(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogout = useCallback((reason?: string) => {
@@ -55,7 +53,7 @@ const Index = () => {
   }, []);
 
   // Register for push notifications once an authenticated session exists —
-  // covers both a fresh login (handleOtpVerified) and a restored session
+  // covers both a fresh login and a restored session
   // (effect above), since both set `user`. setupPushNotifications() itself
   // guards against being run more than once.
   useEffect(() => {
@@ -64,15 +62,8 @@ const Index = () => {
   }, [user]);
 
   const handleLogin = async (phone: string) => {
-    try {
-      const res = await api.sendOtp(phone);
-      setPendingPhone(phone);
-      setPendingOtp(res.otp || null);
-      setIsRegistering(false);
-      setScreen("otp");
-    } catch (err: any) {
-      toast.error(err?.message || t("phoneNotRegistered"));
-    }
+    setPendingPhone(phone);
+    setScreen("login");
   };
 
   const handleRegisterData = async (data: any) => {
@@ -87,19 +78,16 @@ const Index = () => {
         houseNo: data.houseNo,
         shg_name: data.shgName,
       });
-      const res = await api.sendOtp(data.phone);
-      setPendingPhone(data.phone);
-      setPendingOtp(res.otp || null);
-      setIsRegistering(true);
-      setScreen("otp");
+      toast.success(t("registrationPendingApproval"));
+      setScreen("choose");
     } catch (err: any) {
-      toast.error(err?.message || t("registrationFailed"));
+      toast.error(t("registrationFailed"));
     }
   };
 
-  const handleOtpVerified = (verifiedUser: User, token: string) => {
-    setUser(verifiedUser, token);
-    setUserState(verifiedUser);
+  const handleLoginSuccess = (loggedInUser: User, token: string) => {
+    setUser(loggedInUser, token);
+    setUserState(loggedInUser);
     setScreen("app");
   };
 
@@ -127,12 +115,11 @@ const Index = () => {
       {screen === "register" && (
         <RegistrationScreen onNext={handleRegisterData} onBack={() => setScreen("choose")} />
       )}
-      {screen === "otp" && (
-        <OtpScreen
+      {screen === "login" && (
+        <PasswordLoginScreen
           phone={pendingPhone}
-          devOtp={pendingOtp}
-          onVerified={handleOtpVerified}
           onBack={() => setScreen("choose")}
+          onLoginSuccess={handleLoginSuccess}
         />
       )}
       {screen === "admin-login" && (
